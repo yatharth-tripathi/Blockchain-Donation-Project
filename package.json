@@ -9,14 +9,25 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
-    "next": "14.2.14"
+    "@rainbow-me/rainbowkit": "^2.1.7",
+    "@reown/walletkit": "^1.1.0",
+    "@wagmi/core": "^2.13.8",
+    "@walletconnect/core": "^2.17.0",
+    "@walletconnect/utils": "^2.17.0",
+    "dotenv": "^16.4.5",
+    "encoding": "^0.1.13",
+    "ethers": "^6.13.3",
+    "next": "^14.2.14",
+    "pino-pretty": "^11.2.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "styled-components": "^6.1.13",
+    "wagmi": "^2.12.16"
   },
   "devDependencies": {
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
     "eslint": "^8",
-    "eslint-config-next": "14.2.14"
+    "eslint-config-next": "14.2.14",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
   }
 }
