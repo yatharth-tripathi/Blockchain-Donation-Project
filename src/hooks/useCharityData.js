@@ -7,8 +7,10 @@ export const useCharityData = (charityId) => {
 
   useEffect(() => {
     const fetchCharity = async () => {
-      const charityDetails = await contract.charities(charityId);
-      setCharity(charityDetails);
+      if (contract && charityId) {
+        const charityDetails = await contract.charities(charityId); // Ensure the contract method is correct
+        setCharity(charityDetails);
+      }
     };
 
     if (contract) fetchCharity();

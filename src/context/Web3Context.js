@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import CharityPlatformABI from '../contracts/CharityPlatformABI.json';
+import abi from '../contracts/abi.json';
 import contractAddress from '../contracts/contractAddress';
 
 const Web3Context = createContext();
@@ -10,31 +10,42 @@ export const Web3Provider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
   const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true); // Ensure the loading state is set correctly
 
   useEffect(() => {
-    const initWeb3 = async () => {
-      const ethereumProvider = new ethers.providers.Web3Provider(window.ethereum);
-      const userSigner = ethereumProvider.getSigner();
-      const userContract = new ethers.Contract(contractAddress, CharityPlatformABI, userSigner);
+    const connectWallet = async () => {
+      if (window.ethereum) {
+        try {
+          const newProvider = new ethers.providers.Web3Provider(window.ethereum);
+          const accounts = await newProvider.send('eth_requestAccounts', []);
+          const newSigner = newProvider.getSigner();
+          const newContract = new ethers.Contract(contractAddress, abi, newSigner);
 
-      setProvider(ethereumProvider);
-      setSigner(userSigner);
-      setContract(userContract);
-
-      const accounts = await ethereumProvider.listAccounts();
-      if (accounts.length > 0) {
-        setAccount(accounts[0]);
+          setProvider(newProvider);
+          setSigner(newSigner);
+          setContract(newContract);
+          setAccount(accounts[0]);
+          setLoading(false); // Ensure loading is set to false after success
+        } catch (error) {
+          console.error("Error connecting wallet:", error);
+          setLoading(false);
+        }
+      } else {
+        alert('Please install MetaMask to use this app!');
+        setLoading(false);
       }
     };
 
-    initWeb3();
+    connectWallet();
   }, []);
 
   return (
-    <Web3Context.Provider value={{ provider, signer, contract, account }}>
+    <Web3Context.Provider value={{ provider, signer, contract, account, loading }}>
       {children}
     </Web3Context.Provider>
   );
 };
 
-export const useWeb3 = () => useContext(Web3Context);
+export const useWeb3 = () => {
+  return useContext(Web3Context);
+};

@@ -1,34 +1,44 @@
-"use client"; 
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
-import CharityCard from '../components/CharityCard';
 
 const HomePage = () => {
-  const { contract } = useWeb3();
+  const { contract, account, loading } = useWeb3();
   const [charities, setCharities] = useState([]);
 
   useEffect(() => {
-    const fetchCharities = async () => {
-      const charityCount = await contract.charityCount();
-      const charityList = [];
-      for (let i = 1; i <= charityCount; i++) {
-        const charity = await contract.charities(i);
-        charityList.push(charity);
-      }
-      setCharities(charityList);
-    };
+    if (!loading && contract) {
+      const fetchCharities = async () => {
+        try {
+          const charityList = await contract.getAllCharities();
+          setCharities(charityList);
+        } catch (error) {
+          console.error("Error fetching charities:", error);
+        }
+      };
 
-    if (contract) fetchCharities();
-  }, [contract]);
+      fetchCharities();
+    }
+  }, [loading, contract]);
+
+  if (loading) {
+    return <p>Loading Web3...</p>;
+  }
 
   return (
     <div>
-      <h1>Active Charities</h1>
-      <div>
-        {charities.map((charity, idx) => (
-          <CharityCard key={idx} charity={charity} />
-        ))}
-      </div>
+      <h1>Charities</h1>
+      {charities.length ? (
+        charities.map((charity, index) => (
+          <div key={index}>
+            <h3>{charity.name}</h3>
+            <p>{charity.description}</p>
+          </div>
+        ))
+      ) : (
+        <p>No charities found</p>
+      )}
     </div>
   );
 };

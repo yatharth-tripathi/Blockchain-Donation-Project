@@ -1,6 +1,7 @@
 "use client"; 
 import { useState } from 'react';
 import { useWeb3 } from '../context/Web3Context';
+import { ethers } from 'ethers';
 
 const DonateForm = ({ charityId }) => {
   const { contract, account } = useWeb3();

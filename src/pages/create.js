@@ -1,68 +1,69 @@
-"use client"; 
+"use client";
+
 import { useState } from 'react';
 import { useWeb3 } from '../context/Web3Context';
 import { ethers } from 'ethers';
 
 const CreateCharity = () => {
-  const { contract, account } = useWeb3();
+  const { contract, account, loading } = useWeb3(); // Destructure Web3 context
+
+  // States for form fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [goal, setGoal] = useState('');
-  const [milestones, setMilestones] = useState('');
-  const [deadline, setDeadline] = useState('');
 
-  const handleSubmit = async () => {
-    const goalAmount = ethers.utils.parseEther(goal); // Convert goal to Wei
-    const milestonesArray = milestones.split(',').map(milestone => ethers.utils.parseEther(milestone.trim()));
-    const deadlineTimestamp = Math.floor(new Date(deadline).getTime() / 1000); // Convert to UNIX timestamp
+  const createNewCharity = async () => {
+    if (loading) {
+      alert("Web3 is still loading. Please wait...");
+      return;
+    }
+
+    if (!contract || !account) {
+      alert("Wallet not connected or contract not available.");
+      return;
+    }
 
     try {
-      await contract.createCharity(name, description, goalAmount, deadlineTimestamp, milestonesArray, { from: account });
-      alert('Charity created successfully!');
+      const tx = await contract.createCharity(name, description, ethers.utils.parseEther(goal));
+      await tx.wait();
+      alert("Charity created successfully!");
     } catch (error) {
-      console.error('Error creating charity:', error);
-      alert('Error creating charity. Please check the details and try again.');
+      console.error("Error creating charity:", error);
+      alert("Failed to create charity.");
     }
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Create a Charity</h1>
-      <input
-        type="text"
-        placeholder="Charity Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        required
-      />
-      <textarea
-        placeholder="Charity Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        required
-      ></textarea>
-      <input
-        type="text"
-        placeholder="Goal (ETH)"
-        value={goal}
-        onChange={e => setGoal(e.target.value)}
-        required
-      />
-      <input
-        type="text"
-        placeholder="Milestones (comma-separated, ETH)"
-        value={milestones}
-        onChange={e => setMilestones(e.target.value)}
-        required
-      />
-      <input
-        type="date"
-        placeholder="Deadline"
-        value={deadline}
-        onChange={e => setDeadline(e.target.value)}
-        required
-      />
-      <button onClick={handleSubmit}>Create Charity</button>
+    <div>
+      <h1>Create Charity</h1>
+      <form onSubmit={(e) => { e.preventDefault(); createNewCharity(); }}>
+        <div>
+          <label htmlFor="name">Charity Name</label>
+          <input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="goal">Goal Amount (in ETH)</label>
+          <input
+            id="goal"
+            type="number"
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+          />
+        </div>
+        <button type="submit">Create Charity</button>
+      </form>
     </div>
   );
 };

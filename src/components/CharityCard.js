@@ -1,5 +1,6 @@
 "use client"; 
 import Link from 'next/link';
+import { ethers } from 'ethers';
 
 const CharityCard = ({ charity }) => {
   return (
