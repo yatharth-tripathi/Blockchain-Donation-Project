@@ -1,29 +1,20 @@
-import { useWeb3 } from 'path/to/useWeb3'; // Ensure this import is correct
-import Navbar from 'path/to/Navbar'; // Ensure this import is correct
-import Footer from 'path/to/Footer'; // Ensure this import is correct
+import React from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import { Web3Provider } from '@/context/Web3Context';
 
-export default function Layout({ children }) {
-  const { loading, account } = useWeb3();
-  
-  console.log("Loading state: ", loading); // Log loading state to debug
-  console.log("Account: ", account);
-
-  if (loading) {
-    return <p>Loading Web3...</p>;
-  }
-
-  // Optional: Handle case where account is null or undefined
-  if (!account) {
-    return <p>No account found.</p>; // Add a message if no account is available
-  }
-
+const Layout = ({ children }) => {
   return (
-    <html lang="en">
-      <body>
+    <Web3Provider>
+      <div className="flex flex-col min-h-screen">
         <Navbar />
-        <main>{children}</main>
+        <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
         <Footer />
-      </body>
-    </html>
+      </div>
+    </Web3Provider>
   );
-}
+};
+
+export default Layout;

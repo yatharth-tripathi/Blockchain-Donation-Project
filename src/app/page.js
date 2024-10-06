@@ -1,46 +1,49 @@
-"use client";
-
-import { useState, useEffect } from 'react';
+import React from 'react';
+import Link from 'next/link';
 import { useWeb3 } from '../context/Web3Context';
+import CharityCard from '../components/CharityCard';
 
-const HomePage = () => {
-  const { contract, account, loading } = useWeb3();
-  const [charities, setCharities] = useState([]);
+export default function Home() {
+  const { contract } = useWeb3();
+  const [featuredCharities, setFeaturedCharities] = React.useState([]);
 
-  useEffect(() => {
-    if (!loading && contract) {
-      const fetchCharities = async () => {
-        try {
-          const charityList = await contract.getAllCharities();
-          setCharities(charityList);
-        } catch (error) {
-          console.error("Error fetching charities:", error);
-        }
-      };
+  React.useEffect(() => {
+    const fetchFeaturedCharities = async () => {
+      if (contract) {
+        // This is a placeholder. You'll need to implement a method to get featured charities
+        // For now, we'll just get the first 3 charities
+        const charityCount = await contract.methods.charityCount().call();
+        const charities = await Promise.all(
+          Array.from({ length: Math.min(3, charityCount) }, (_, i) =>
+            contract.methods.charities(i + 1).call()
+          )
+        );
+        setFeaturedCharities(charities);
+      }
+    };
 
-      fetchCharities();
-    }
-  }, [loading, contract]);
-
-  if (loading) {
-    return <p>Loading Web3...</p>;
-  }
+    fetchFeaturedCharities();
+  }, [contract]);
 
   return (
-    <div>
-      <h1>Charities</h1>
-      {charities.length ? (
-        charities.map((charity, index) => (
-          <div key={index}>
-            <h3>{charity.name}</h3>
-            <p>{charity.description}</p>
-          </div>
-        ))
-      ) : (
-        <p>No charities found</p>
-      )}
+    <div className="container mx-auto px-4">
+      <h1 className="text-4xl font-bold text-center my-8">Welcome to the Charity Platform</h1>
+      <p className="text-xl text-center mb-8">Support causes you care about with blockchain technology</p>
+      
+      <h2 className="text-2xl font-semibold mb-4">Featured Charities</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {featuredCharities.map((charity) => (
+          <CharityCard key={charity.id} charity={charity} />
+        ))}
+      </div>
+
+      <div className="text-center mt-8">
+        <Link href="/charities">
+          <a className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            View All Charities
+          </a>
+        </Link>
+      </div>
     </div>
   );
-};
-
-export default HomePage;
+}

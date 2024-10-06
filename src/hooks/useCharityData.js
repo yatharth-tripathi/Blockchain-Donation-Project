@@ -1,20 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWeb3 } from '../context/Web3Context';
 
-export const useCharityData = (charityId) => {
+export function useCharityData(charityId) {
   const { contract } = useWeb3();
   const [charity, setCharity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCharity = async () => {
-      if (contract && charityId) {
-        const charityDetails = await contract.charities(charityId); // Ensure the contract method is correct
-        setCharity(charityDetails);
-      }
-    };
+    async function fetchCharityData() {
+      if (!contract || !charityId) return;
 
-    if (contract) fetchCharity();
+      try {
+        setLoading(true);
+        const charityData = await contract.methods.charities(charityId).call();
+        setCharity(charityData);
+      } catch (err) {
+        console.error('Error fetching charity data:', err);
+        setError('Failed to fetch charity data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCharityData();
   }, [contract, charityId]);
 
-  return charity;
-};
+  return { charity, loading, error };
+}

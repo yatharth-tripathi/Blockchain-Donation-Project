@@ -1,19 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import { Web3Context } from '../context/Web3Context';
 
-export const useWeb3 = () => {
-  const [loading, setLoading] = useState(true);
-  const [account, setAccount] = useState(null);
-
-  useEffect(() => {
-    const fetchAccount = async () => {
-      // Logic to fetch account from Web3 provider
-      // Example: const accounts = await web3.eth.getAccounts();
-      // setAccount(accounts[0]);
-      setLoading(false);
-    };
-
-    fetchAccount();
-  }, []);
-
-  return { loading, account };
-};
+export function useWeb3() {
+  const context = useContext(Web3Context);
+  if (context === undefined) {
+    throw new Error('useWeb3 must be used within a Web3Provider');
+  }
+  return context;
+}
